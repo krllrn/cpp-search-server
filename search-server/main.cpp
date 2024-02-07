@@ -107,44 +107,32 @@ public:
             throw invalid_argument("Document ID presents in documents."s);
         }
         else {
-            try {
-                ids_.push_back(document_id);
-                const vector<string> words = SplitIntoWordsNoStop(document);
-
-                const double inv_word_count = 1.0 / words.size();
-                for (const string& word : words) {
-                    word_to_document_freqs_[word][document_id] += inv_word_count;
-                }
-                documents_.emplace(document_id,
-                    DocumentData{ ComputeAverageRating(ratings), status });
+            ids_.push_back(document_id);
+            const vector<string> words = SplitIntoWordsNoStop(document);
+            const double inv_word_count = 1.0 / words.size();
+            for (const string& word : words) {
+               word_to_document_freqs_[word][document_id] += inv_word_count;
             }
-            catch (const invalid_argument& ex) {
-                throw ex;
-            }
-
+            documents_.emplace(document_id,
+               DocumentData{ ComputeAverageRating(ratings), status });
         }
     }
 
     template <typename DocumentPredicate>
     vector<Document> FindTopDocuments(const string& raw_query, DocumentPredicate document_predicate) const {
         vector<Document> result;
-        try {
-            Query query = ParseQuery(raw_query);
-            result = FindAllDocuments(query, document_predicate);
-            sort(result.begin(), result.end(),
-                [](const Document& lhs, const Document& rhs) {
-                    if (INACCURACY(lhs.relevance, rhs.relevance)) {
-                        return lhs.rating > rhs.rating;
-                    }
-                    return lhs.relevance > rhs.relevance;
-                });
-            if (result.size() > MAX_RESULT_DOCUMENT_COUNT) {
-                result.resize(MAX_RESULT_DOCUMENT_COUNT);
-            }
-        }
-        catch (const invalid_argument& ex) {
-            throw ex;
-        }
+        Query query = ParseQuery(raw_query);
+        result = FindAllDocuments(query, document_predicate);
+        sort(result.begin(), result.end(),
+            [](const Document& lhs, const Document& rhs) {
+                 if (INACCURACY(lhs.relevance, rhs.relevance)) {
+                     return lhs.rating > rhs.rating;
+                 }
+                 return lhs.relevance > rhs.relevance;
+            });
+         if (result.size() > MAX_RESULT_DOCUMENT_COUNT) {
+             result.resize(MAX_RESULT_DOCUMENT_COUNT);
+         }
 
         return result;
     }
@@ -348,7 +336,7 @@ int main() {
         search_server.AddDocument(1, "пушистый кот пушистый хвост"s, DocumentStatus::ACTUAL, { 7, 2, 7 });
         //search_server.AddDocument(1, "пушистый пёс и модный ошейник"s, DocumentStatus::ACTUAL, { 1, 2 });
         //search_server.AddDocument(-1, "пушистый пёс и модный ошейник"s, DocumentStatus::ACTUAL, { 1, 2 });
-        search_server.AddDocument(3, "большой пёс скво\x12рец"s, DocumentStatus::ACTUAL, { 1, 3, 2 });
+        //search_server.AddDocument(3, "большой пёс скво\x12рец"s, DocumentStatus::ACTUAL, { 1, 3, 2 });
         search_server.FindTopDocuments("кот-пушистый"s);
         search_server.FindTopDocuments("--пушистый"s);
     }
