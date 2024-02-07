@@ -1,2 +1,0 @@
-/search-server/*
-!/search-server/main.cpp
