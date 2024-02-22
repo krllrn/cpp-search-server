@@ -1,3 +1,3 @@
-*
-!main.cpp
-!README
+x64/Debug/
+search-server\x64\Debug\search-server.tlog
+*.exe
